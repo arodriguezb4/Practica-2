@@ -1,5 +1,3 @@
-//import GraphQLServer from 'graphql-yoga';
-
 const { ApolloServer, gql } = require('apollo-server');
 
 const autorData = [];
@@ -68,19 +66,19 @@ const resolvers = {
     Ingredientes: {
         recetas_aparece: (parent, args, ctx, info) => {
             const ingredienteNombre = parent.nombre;
-            return recetasData.filter(obj => obj.titulo === ingredienteNombre);
+            return recetasData.filter(obj => obj.ingredientes.includes(ingredienteNombre));
         }
     },
 
     Recetas: {
         autor: (parent, args, ctx, info) => {
             const autorNombre = parent.autor;
-            return autorData.filter(obj => obj.nombre === autorNombre);
+            return autorData.find(obj => obj.nombre === autorNombre);
         },
 
         ingredientes: (parent, args, ctx, info) => {
-            const titulo = parent.titulo;
-            return ingredientesData.filter(obj => obj.nombre === titulo)
+            return ingredientesData.filter(obj => parent.ingredientes.includes(obj.nombre));
+
         }
     },
 
@@ -141,7 +139,9 @@ const resolvers = {
         addReceta: (parent, args, ctx, info) => {
             const { titulo, descripcion, autor, ingredientes } = args;
             if (!autorData.some(obj => obj.nombre === autor)) throw new Error(`Author ${autor} not found`)
-            if (!ingredientesData.some(obj => ingredientes.includes(obj.nombre))) throw new Error(`Ingrediente ${ingredientes} not found`)
+            ingredientes.forEach(elem => {
+                if (!ingredientesData.some(obj => elem === obj.nombre)) throw new Error(`Ingrediente ${elem} not found`)
+            })
             if (recetasData.some(obj => obj.titulo === titulo)) throw new Error(`Recipe name ${titulo} already created`)
             var today = new Date();
             var dd = String(today.getDate()).padStart(2, '0');
@@ -232,10 +232,10 @@ const resolvers = {
         editAutor: (parent, args, ctx, info) => {
             const email = args.mail;
 
-            if(email){
+            if (email) {
                 const nombre = args.name;
 
-                if(autorData.some(obj => obj.name === nombre)){
+                if (autorData.some(obj => obj.name === nombre)) {
                     const result = autorData.find(obj => obj.name === nombre);
                     const index = autorData.indexOf(result);
                     autorData[index].mail = email

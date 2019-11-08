@@ -9,4 +9,4 @@ npm install
 ## Run
 
 ```js
-npm start -- [command] [--arguments]
+npm run dev

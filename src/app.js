@@ -46,7 +46,7 @@ const typeDefs = `
 
         editAutor(nombre: String!, email: String): Autor
         editReceta(titulo: String!, descripcion: String, autor: String, ingredientes: [String!]): Recetas
-        editIngrediente(name: String!): Ingredientes
+        editIngrediente(nombre: String!, nombre_nuevo: String!): Ingredientes
     }
  
 
@@ -167,9 +167,9 @@ const resolvers = {
 
                 recetasData.splice(index, 1);
 
-                return (`Successfully deleted ${titulo}`)
+                return (`Successfully deleted ${receta}`)
             } else {
-                return (`Recipe ${titulo} not found`)
+                return (`Recipe ${receta} not found`)
             }
 
 
@@ -204,17 +204,8 @@ const resolvers = {
         deleteIngrediente: (parent, args, ctx, info) => {
             const nombre = args.nombre;
 
-            const result = ingredientesData.find(obj => obj.nombre === nombre);
-            if (result) {
-                const index = ingredientesData.indexOf(result)
-                ingredientesData.splice(index, 1);
-
-                return (`Ingredient ${nombre} deleted successfully`)
-            } else {
-                return (`Ingredient ${nombre} not found`)
-            }
-
-            /*if(ingredientesData.some(obj => obj.nombre === nombre)){
+            const result = ingredientesData.filter(obj => obj.nombre === nombre);
+            if(ingredientesData.some(obj => obj.nombre === nombre)){
                 ingredientesData.forEach(elem => {
                     const ff = elem.nombre === nombre;
                     if(ff){
@@ -226,24 +217,82 @@ const resolvers = {
                 return (`Ingredient ${nombre} deleted successfully`)
             }else{
                 return (`Ingredient ${nombre} not found`)
-            }*/
+            }
         },
 
         editAutor: (parent, args, ctx, info) => {
-            const email = args.mail;
-
+            const email = args.email;
+            
             if (email) {
-                const nombre = args.name;
+                const nombre = args.nombre;
 
-                if (autorData.some(obj => obj.name === nombre)) {
-                    const result = autorData.find(obj => obj.name === nombre);
+                if (autorData.some(obj => obj.nombre === nombre)) {
+                    const result = autorData.find(obj => obj.nombre === nombre);
                     const index = autorData.indexOf(result);
-                    autorData[index].mail = email
+                    autorData[index].email = email
 
-                    const f = autorData.find(obj => obj.name === nombre);
+                    const f = autorData.find(obj => obj.nombre === nombre);
 
                     return f;
                 }
+            }
+        },
+
+        editReceta: (parent, args, ctx, info) => {
+            const descripcion = args.descripcion;
+            const autor = args.autor;
+            const ingredientes = args.ingredientes;
+            const titulo = args.titulo;
+            if(descripcion){
+                if(recetasData.some(obj => obj.titulo === titulo)){
+                    const result = recetasData.find(obj => obj.titulo === titulo);
+                    const index = recetasData.indexOf(result);
+                    recetasData[index].descripcion = descripcion;
+                }
+            }
+            if(autor){
+                const aut = autorData.some(obj => obj.nombre === autor);
+                if(aut){
+                    if(recetasData.some(obj => obj.titulo === titulo)){
+                        const result = recetasData.find(obj => obj.titulo === titulo);
+                        const index = recetasData.indexOf(result);
+                        recetasData[index].autor = autor;
+                    }
+                }
+                if(!aut || null){
+                    return (`Autor ${autor} not found`)
+                }
+            }
+            if(ingredientes){
+                const ing = ingredientesData.some(obj => obj.nombre === ingredientes);
+                if(ing){
+                    if(recetasData.some(obj => obj.titulo === titulo)){
+                        const result = recetasData.find(obj => obj.titulo === titulo);
+                        const index = recetasData.indexOf(result);
+                        recetasData[index].ingredientes = ingredientes;
+                    }
+                }
+                if(!ing || null){
+                    return (`Ingredient ${ingredientes} not found.`)
+                }
+            }
+
+            const f = recetasData.find(obj => obj.titulo === titulo);
+            return f;
+        },
+
+        editIngrediente: (parent, args, ctx, info) => {
+            const nombre = args.nombre;
+            const nombre_nuevo = args.nombre_nuevo;
+
+            const gg = ingredientesData.some(obj => obj.nombre === nombre);
+            if(gg){
+                const result = ingredientesData.find(obj => obj.nombre === nombre);
+                const index = ingredientesData.indexOf(result);
+                ingredientesData[index].nombre = nombre_nuevo;
+
+                const f = ingredientesData.find(obj => obj.nombre === nombre_nuevo);
+                return f;
             }
         }
 
